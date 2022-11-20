@@ -131,3 +131,6 @@ class Board:
     def print(self):
         for row in self.__board:
             print(row)
+
+    def repr(self):
+        return [[repr(tile) for tile in row] for row in self.__board]

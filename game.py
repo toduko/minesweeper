@@ -39,3 +39,6 @@ class Game:
 
     def print(self):
         self.__board.print()
+
+    def repr(self):
+        return self.__board.repr()
