@@ -1,3 +1,8 @@
+# Local minesweeper scores
+easy
+medium
+hard
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

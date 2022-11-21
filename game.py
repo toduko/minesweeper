@@ -28,14 +28,8 @@ class Game:
     def has_won(self):
         return self.__board.has_won()
 
-    def calculate_results(self):
-        difficulty_score = pow(2, self.__board.get_rows())\
-            * pow(2, self.__board.get_cols()) * \
-            (self.__board.get_mines() /
-             (self.__board.get_rows() * self.__board.get_cols()))
-
-        time_score = self.__end_time - self.__start_time
-        return (difficulty_score, time_score)
+    def get_time(self):
+        return self.__end_time - self.__start_time
 
     def print(self):
         self.__board.print()

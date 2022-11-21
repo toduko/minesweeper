@@ -57,10 +57,10 @@ class CLI:
             self.__game.print()
 
             if not self.__game.should_continue():
-                score, time = self.__game.calculate_results()
+                time = self.__game.get_time()
                 if self.__game.has_won():
                     print("You won!")
-                    print(f"{score = } {time = }")
+                    print(f"{time = }")
                 else:
                     print("You lost!")
 
