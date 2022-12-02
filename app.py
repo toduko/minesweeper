@@ -27,7 +27,7 @@ class App:
     def __init__(self):
         pygame.init()
         pygame.event.set_allowed([pygame.QUIT, pygame.KEYDOWN, pygame.KEYUP])
-        pygame.display.set_icon(pygame.image.load("assets/*.png"))
+        pygame.display.set_icon(pygame.image.load("assets/mine.png"))
         pygame.display.set_caption('Minesweeper')
         self.__font = pygame.font.Font(
             pygame.font.get_default_font(), self.__font_size)
@@ -100,6 +100,19 @@ class App:
             self.__render_text(
                 "Press ESCAPE to go back", self.__height // 2 + self.__margin // 2)
 
+    def __get_image_from_tile_char(self, char):
+        if char == '#':
+            return "hidden"
+        elif char == 'P':
+            return "flag"
+        elif char == '*':
+            return "mine"
+        elif char == ' ':
+            return "0"
+        else:
+            return char
+
+
     def __render_game(self):
         state = self.__game.repr()
 
@@ -122,7 +135,7 @@ class App:
             for j in range(self.__cols):
                 if self.__last_state and self.__last_state[i][j] == state[i][j]:
                     continue
-                tile = pygame.image.load(f"assets/{state[i][j]}.png")
+                tile = pygame.image.load(f"assets/{self.__get_image_from_tile_char(state[i][j])}.png")
                 tile_rect = tile.get_rect()
                 tile_rect.x, tile_rect.y = i * self.__image_size, j * self.__image_size
                 self.__screen.blit(tile, tile_rect)
