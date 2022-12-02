@@ -122,7 +122,7 @@ class App:
         if self.__lclick:
             self.__game.show(x, y)
 
-            if not self.__game.should_continue():
+            if not self.__game.should_continue() and self.__game.has_won() and state != self.__game.repr():
                 time = self.__game.get_time()
                 file = open(self.__difficulty, "a")
                 file.write(str(time) + "\n")
