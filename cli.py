@@ -1,22 +1,37 @@
+'''
+CLI module
+'''
+
+
 from game import Game
 from board import Board
 
 
 class CLI:
+    '''
+    This class is used to play minesweeper on the console.
+    It provides an interface for playing using commands.
+    '''
+
     def __init__(self):
-        self.__accept_input = True
-        self.__game = None
+        self.__accept_input: bool = True
+        self.__game: Game = None
 
         while self.__accept_input:
-            cmd = input("Minesweeper CLI> ")
+            cmd: str = input("Minesweeper CLI> ")
             self.__parse(cmd)
 
         print("Thank you for playing!")
 
-    def __parse(self, cmd):
+    def __parse(self, cmd: str):
+        '''
+        Parses the command
+        '''
+        instr: str
+        args: list[str]
         instr, *args = cmd.split(' ')
 
-        def should_accept_cmd(n=2):
+        def should_accept_cmd(expected_num_args: int = 2) -> bool:
             if instr.lower() == "new" and not Board.is_valid_board(int(args[0]), int(args[1]), int(args[2])):
                 print("Not a valid game")
                 return False
@@ -25,7 +40,7 @@ class CLI:
                 print("Not in an active game")
                 return False
 
-            if len(args) != n or args == filter(lambda arg: arg.isalphanum(), args):
+            if len(args) != expected_num_args or args == filter(lambda arg: arg.isalphanum(), args):
                 print("Invalid arguments")
                 return False
 
