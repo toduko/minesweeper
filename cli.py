@@ -73,6 +73,3 @@ class CLI:
             self.__game.print()
         else:
             print("Invalid command. Type help to see a list of available commands.")
-
-
-cli = CLI()

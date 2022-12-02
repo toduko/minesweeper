@@ -4,7 +4,7 @@ import pygame
 from game import Game
 
 
-class App:
+class GUI:
     __image_size = 32
     __font_size = 20
     __left = False
@@ -112,7 +112,6 @@ class App:
         else:
             return char
 
-
     def __render_game(self):
         state = self.__game.repr()
 
@@ -135,7 +134,8 @@ class App:
             for j in range(self.__cols):
                 if self.__last_state and self.__last_state[i][j] == state[i][j]:
                     continue
-                tile = pygame.image.load(f"assets/{self.__get_image_from_tile_char(state[i][j])}.png")
+                tile = pygame.image.load(
+                    f"assets/{self.__get_image_from_tile_char(state[i][j])}.png")
                 tile_rect = tile.get_rect()
                 tile_rect.x, tile_rect.y = i * self.__image_size, j * self.__image_size
                 self.__screen.blit(tile, tile_rect)
@@ -214,6 +214,3 @@ class App:
         self.__set_screen_size(
             self.__rows * self.__image_size, self.__cols * self.__image_size)
         self.__game = Game(self.__rows, self.__cols, self.__mines)
-
-
-App()
