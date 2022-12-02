@@ -1,28 +1,41 @@
+'''
+GUI module
+'''
+
 import sys
+from typing import Callable
 import pygame
 
 from game import Game
 
 
 class GUI:
-    __image_size = 32
-    __font_size = 20
-    __left = False
-    __right = False
-    __timer_lclick = 0
-    __timer_rclick = 0
-    __last_state = None
-    __lclick = False
-    __rclick = False
-    __game = None
-    __difficulty_presets = {"easy": (10, 10, 10), "medium": (
+    '''
+    This class is used to play minesweeper with a graphical user interface.
+    It has a menu for choosing a difficulty and leaderboards for difficulties with top scores.
+    '''
+    __image_size: int = 32
+    __font_size: int = 20
+    __left: bool = False
+    __right: bool = False
+    __timer_lclick: int = 0
+    __timer_rclick: int = 0
+    __last_state: list[list[str]] = None
+    __lclick: bool = False
+    __rclick: bool = False
+    __game: Game = None
+    __difficulty_presets: dict[str, tuple[int, int, int]] = {"easy": (10, 10, 10), "medium": (
         16, 16, 40), "hard": (16, 30, 99)}
-    __leaderboard = None
-    __leaderboard_list = False
-    __button_width = 240
-    __button_height = 30
-    __padding = 80
-    __margin = 60
+    __leaderboard: str = None
+    __leaderboard_list: bool = False
+    __button_width: int = 240
+    __button_height: int = 30
+    __padding: int = 80
+    __margin: int = 60
+    __size: int = 0
+    __width: int = 0
+    __height: int = 0
+    __screen: pygame.Surface = None
 
     def __init__(self):
         pygame.init()
@@ -36,10 +49,13 @@ class GUI:
         while True:
             self.__render()
 
-    def __render_button(self, y, title, on_click):
+    def __render_button(self, y: int, title: str, on_click: Callable[[], None]):
+        '''
+        Renders a button on the screen
+        '''
         pygame.draw.rect(self.__screen, (100, 100, 100), [
             self.__width // 2 - self.__button_width // 2, y - self.__button_height // 2, self.__button_width, self.__button_height])
-        self.__render_text(title.capitalize(), y)
+        self.__render_text(y, title.capitalize())
 
         mouse_x, mouse_y = pygame.mouse.get_pos()
 
@@ -49,6 +65,9 @@ class GUI:
                 on_click()
 
     def __handle_mouse(self):
+        '''
+        Handles mouse up/down events
+        '''
         self.__left, _, self.__right = pygame.mouse.get_pressed()
 
         if self.__left:
@@ -65,42 +84,51 @@ class GUI:
                 self.__rclick = True
             self.__timer_rclick = 0
 
-    def __render_text(self, title, y):
+    def __render_text(self, y: int, title: str):
+        '''
+        Renders text on screen
+        '''
         text = self.__font.render(title, (0, 0, 0), (255, 255, 255))
         text_rect = text.get_rect()
         text_rect.center = (self.__width // 2, y)
         self.__screen.blit(text, text_rect)
 
-    def __get_top_ten_scores(self):
+    def __get_top_k_scores(self, k: int):
+        '''
+        Renders the top scores of screen
+        '''
         self.__screen.fill((0, 0, 0))
 
         try:
             file = open(self.__leaderboard, "r")
 
-            top_ten = sorted(list(map(lambda x: float(x), filter(lambda x: x.replace(
-                '.', '', 1).isdigit(), file.read().split("\n")))))[:10]
-            if top_ten:
+            top_scores = sorted(list(map(float, filter(lambda x: x.replace(
+                '.', '', 1).isdigit(), file.read().split("\n")))))[:k]
+            if top_scores:
                 self.__set_screen_size(
-                    640, (len(top_ten) + 2) * (self.__margin // 2) + 2 * self.__padding)
+                    640, (len(top_scores) + 2) * (self.__margin // 2) + 2 * self.__padding)
                 self.__render_text(
-                    f"Top {self.__leaderboard} scores:", self.__padding)
-                for i in range(len(top_ten)):
+                    self.__padding, f"Top {self.__leaderboard} scores:")
+                for i, score in enumerate(top_scores):
                     self.__render_text(
-                        f"{i + 1} - {top_ten[i]:0.4f} seconds", self.__padding + (i + 1) * self.__margin // 2)
+                        self.__padding + (i + 1) * self.__margin // 2, f"{i + 1} - {score:0.4f} seconds")
                 self.__render_text(
-                    "Press ESCAPE to go back", self.__padding + (len(top_ten) + 2) * self.__margin // 2)
+                    self.__padding + (len(top_scores) + 2) * self.__margin // 2, "Press ESCAPE to go back")
             else:
                 self.__render_text(
-                    "No scores found for this difficulty", self.__height // 2 - self.__margin // 2)
+                    self.__height // 2 - self.__margin // 2, "No scores found for this difficulty")
                 self.__render_text(
-                    "Press ESCAPE to go back", self.__height // 2 + self.__margin // 2)
+                    self.__height // 2 + self.__margin // 2, "Press ESCAPE to go back")
         except FileNotFoundError:
             self.__render_text(
-                "No scores found for this difficulty", self.__height // 2 - self.__margin // 2)
+                self.__height // 2 - self.__margin // 2, "No scores found for this difficulty")
             self.__render_text(
-                "Press ESCAPE to go back", self.__height // 2 + self.__margin // 2)
+                self.__height // 2 + self.__margin // 2, "Press ESCAPE to go back")
 
-    def __get_image_from_tile_char(self, char):
+    def __get_image_from_tile_char(self, char: str):
+        '''
+        Get image filename from char representation of tile
+        '''
         if char == '#':
             return "hidden"
         elif char == 'P':
@@ -113,6 +141,9 @@ class GUI:
             return char
 
     def __render_game(self):
+        '''
+        Renders a minesweeper game on the screen
+        '''
         state = self.__game.repr()
 
         pos = pygame.mouse.get_pos()
@@ -141,15 +172,21 @@ class GUI:
                 self.__screen.blit(tile, tile_rect)
 
         if not self.__game.should_continue():
-            self.__render_text(f"You won! Your time is {self.__game.get_time():0.4f}s" if self.__game.has_won(
-            ) else "You lost", self.__height // 2)
+            self.__render_text(self.__height // 2, f"You won! Your time is {self.__game.get_time():0.4f}s" if self.__game.has_won(
+            ) else "You lost")
 
         self.__last_state = state
 
     def __toggle_list(self):
+        '''
+        Toggles whether the leaderboards list is shown or not
+        '''
         self.__leaderboard_list ^= True
 
     def __render_menu(self):
+        '''
+        Renders game menu to the screen
+        '''
         for i, difficulty in enumerate(self.__difficulty_presets.keys()):
             self.__render_button(
                 self.__padding + i * self.__margin, difficulty, lambda: self.__start_game(difficulty))
@@ -157,8 +194,11 @@ class GUI:
                              * self.__margin, "leaderboards", self.__toggle_list)
 
     def __render_list(self):
-        def set_leaderboard(difficulty):
-            self.__leaderboard = difficulty
+        '''
+        Renders leaderboard list to the screen
+        '''
+        def set_leaderboard(difficulty: str):
+            self.__leaderboard: str = difficulty
 
         for i, difficulty in enumerate(self.__difficulty_presets.keys()):
             self.__render_button(
@@ -167,19 +207,31 @@ class GUI:
                              * self.__margin, "back", self.__toggle_list)
 
     def __get_menu(self):
+        '''
+        Updates the state so that the next render the menu is shown
+        '''
         self.__game = None
         self.__last_state = None
         self.__leaderboard = None
         self.__set_menu_size()
 
     def __render_leaderboard(self):
-        self.__get_top_ten_scores()
+        '''
+        Renders leaderboard to the screen
+        '''
+        self.__get_top_k_scores(10)
 
     def __set_menu_size(self):
+        '''
+        Sets the screen size to fit the menu
+        '''
         self.__set_screen_size(
             640, self.__padding * 2 + (len(self.__difficulty_presets.keys()) + 1) * self.__margin)
 
     def __render(self):
+        '''
+        Renders everything to the screen
+        '''
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 sys.exit()
@@ -204,11 +256,17 @@ class GUI:
 
         pygame.display.update()
 
-    def __set_screen_size(self, width, height):
+    def __set_screen_size(self, width: int, height: int):
+        '''
+        Sets screen size
+        '''
         self.__size = self.__width, self.__height = width, height
         self.__screen = pygame.display.set_mode(self.__size)
 
-    def __start_game(self, difficulty):
+    def __start_game(self, difficulty: str):
+        '''
+        Initializes a game according to the difficulty
+        '''
         self.__difficulty = difficulty
         self.__rows, self.__cols, self.__mines = self.__difficulty_presets[self.__difficulty]
         self.__set_screen_size(
