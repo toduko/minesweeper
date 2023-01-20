@@ -62,7 +62,10 @@ class Game:
         '''
         self.__board.print()
 
-    def get_dimensions(self):
+    def get_dimensions(self) -> tuple[int, int]:
+        '''
+        Returns the width and height of the game board
+        '''
         return self.__board.get_rows(), self.__board.get_cols()
 
     def repr(self):

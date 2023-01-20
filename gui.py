@@ -48,24 +48,23 @@ class GUI:
         self.__screen.fill((0, 0, 0))
 
         try:
-            file = open(self.__leaderboard, "r")
+            with open(self.__leaderboard, "r", encoding="utf-8") as file:
+                top_scores = sorted(list(map(float, filter(lambda x: x.replace(
+                    '.', '', 1).isdigit(), file.read().split("\n")))))[:k]
 
-            top_scores = sorted(list(map(float, filter(lambda x: x.replace(
-                '.', '', 1).isdigit(), file.read().split("\n")))))[:k]
+                if not top_scores:
+                    raise LookupError
 
-            if not top_scores:
-                raise Exception()
-
-            self.__set_screen_size(
-                640, (len(top_scores) + 2) * (self.__margin // 2) + 2 * self.__padding)
-            Text(self.__width // 2,
-                 self.__padding, f"Top {self.__leaderboard} scores:").render(self.__screen)
-            for i, score in enumerate(top_scores):
+                self.__set_screen_size(
+                    640, (len(top_scores) + 2) * (self.__margin // 2) + 2 * self.__padding)
                 Text(self.__width // 2,
-                     self.__padding + (i + 1) * self.__margin // 2, f"{i + 1} - {score:0.4f} seconds").render(self.__screen)
-            Text(self.__width // 2,
-                 self.__padding + (len(top_scores) + 2) * self.__margin // 2, "Press ESCAPE to go back").render(self.__screen)
-        except:
+                     self.__padding, f"Top {self.__leaderboard} scores:").render(self.__screen)
+                for i, score in enumerate(top_scores):
+                    Text(self.__width // 2,
+                         self.__padding + (i + 1) * self.__margin // 2, f"{i + 1} - {score:0.4f} seconds").render(self.__screen)
+                Text(self.__width // 2,
+                     self.__padding + (len(top_scores) + 2) * self.__margin // 2, "Press ESCAPE to go back").render(self.__screen)
+        except (FileNotFoundError, LookupError):
             Text(self.__width // 2,
                  self.__height // 2 - self.__margin // 2, "No scores found for this difficulty").render(self.__screen)
             Text(self.__width // 2,
@@ -99,10 +98,8 @@ class GUI:
             self.__game.show(x, y)
 
             if not self.__game.should_continue() and self.__game.has_won() and state != self.__game.repr():
-                time = self.__game.get_time()
-                file = open(self.__difficulty, "a")
-                file.write(str(time) + "\n")
-                file.close()
+                with open(self.__difficulty, "a", encoding="utf-8") as file:
+                    file.write(str(self.__game.get_time()) + "\n")
 
         if self.__mouse.is_right_clicked():
             self.__game.toggle_marked(x, y)
