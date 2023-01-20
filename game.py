@@ -62,6 +62,9 @@ class Game:
         '''
         self.__board.print()
 
+    def get_dimensions(self):
+        return self.__board.get_rows(), self.__board.get_cols()
+
     def repr(self):
         '''
         Gets the board representation

@@ -3,11 +3,12 @@ GUI module
 '''
 
 import sys
-from typing import Callable
 import pygame
 
+from button import Button
 from mouse import Mouse
 from game import Game
+from text import Text
 
 
 class GUI:
@@ -16,15 +17,12 @@ class GUI:
     It has a menu for choosing a difficulty and leaderboards for difficulties with top scores.
     '''
     __image_size: int = 32
-    __font_size: int = 20
     __last_state: list[list[str]] = None
     __game: Game = None
     __difficulty_presets: dict[str, tuple[int, int, int]] = {"easy": (10, 10, 10), "medium": (
         16, 16, 40), "hard": (16, 30, 99)}
     __leaderboard: str = None
     __leaderboard_list: bool = False
-    __button_width: int = 240
-    __button_height: int = 30
     __padding: int = 80
     __margin: int = 60
     __size: int = 0
@@ -38,36 +36,10 @@ class GUI:
         pygame.event.set_allowed([pygame.QUIT, pygame.KEYDOWN, pygame.KEYUP])
         pygame.display.set_icon(pygame.image.load("assets/mine.png"))
         pygame.display.set_caption('Minesweeper')
-        self.__font = pygame.font.Font(
-            pygame.font.get_default_font(), self.__font_size)
         self.__set_menu_size()
 
         while True:
             self.__render()
-
-    def __render_button(self, y: int, title: str, on_click: Callable[[], None]):
-        '''
-        Renders a button on the screen
-        '''
-        pygame.draw.rect(self.__screen, (100, 100, 100), [
-            self.__width // 2 - self.__button_width // 2, y - self.__button_height // 2, self.__button_width, self.__button_height])
-        self.__render_text(y, title.capitalize())
-
-        if (self.__mouse.is_in_square(self.__width // 2 - self.__button_width // 2,
-                                      self.__width // 2 + self.__button_width // 2,
-                                      y - self.__button_height // 2,
-                                      y + self.__button_height // 2)) \
-                and self.__mouse.is_left_clicked():
-            on_click()
-
-    def __render_text(self, y: int, title: str):
-        '''
-        Renders text on screen
-        '''
-        text = self.__font.render(title, (0, 0, 0), (255, 255, 255))
-        text_rect = text.get_rect()
-        text_rect.center = (self.__width // 2, y)
-        self.__screen.blit(text, text_rect)
 
     def __get_top_k_scores(self, k: int):
         '''
@@ -80,26 +52,24 @@ class GUI:
 
             top_scores = sorted(list(map(float, filter(lambda x: x.replace(
                 '.', '', 1).isdigit(), file.read().split("\n")))))[:k]
-            if top_scores:
-                self.__set_screen_size(
-                    640, (len(top_scores) + 2) * (self.__margin // 2) + 2 * self.__padding)
-                self.__render_text(
-                    self.__padding, f"Top {self.__leaderboard} scores:")
-                for i, score in enumerate(top_scores):
-                    self.__render_text(
-                        self.__padding + (i + 1) * self.__margin // 2, f"{i + 1} - {score:0.4f} seconds")
-                self.__render_text(
-                    self.__padding + (len(top_scores) + 2) * self.__margin // 2, "Press ESCAPE to go back")
-            else:
-                self.__render_text(
-                    self.__height // 2 - self.__margin // 2, "No scores found for this difficulty")
-                self.__render_text(
-                    self.__height // 2 + self.__margin // 2, "Press ESCAPE to go back")
-        except FileNotFoundError:
-            self.__render_text(
-                self.__height // 2 - self.__margin // 2, "No scores found for this difficulty")
-            self.__render_text(
-                self.__height // 2 + self.__margin // 2, "Press ESCAPE to go back")
+
+            if not top_scores:
+                raise Exception()
+
+            self.__set_screen_size(
+                640, (len(top_scores) + 2) * (self.__margin // 2) + 2 * self.__padding)
+            Text(self.__width // 2,
+                 self.__padding, f"Top {self.__leaderboard} scores:").render(self.__screen)
+            for i, score in enumerate(top_scores):
+                Text(self.__width // 2,
+                     self.__padding + (i + 1) * self.__margin // 2, f"{i + 1} - {score:0.4f} seconds").render(self.__screen)
+            Text(self.__width // 2,
+                 self.__padding + (len(top_scores) + 2) * self.__margin // 2, "Press ESCAPE to go back").render(self.__screen)
+        except:
+            Text(self.__width // 2,
+                 self.__height // 2 - self.__margin // 2, "No scores found for this difficulty").render(self.__screen)
+            Text(self.__width // 2,
+                 self.__height // 2 + self.__margin // 2, "Press ESCAPE to go back").render(self.__screen)
 
     def __get_image_from_tile_char(self, char: str):
         '''
@@ -137,8 +107,10 @@ class GUI:
         if self.__mouse.is_right_clicked():
             self.__game.toggle_marked(x, y)
 
-        for i in range(self.__rows):
-            for j in range(self.__cols):
+        rows, cols = self.__game.get_dimensions()
+
+        for i in range(rows):
+            for j in range(cols):
                 if self.__last_state and self.__last_state[i][j] == state[i][j]:
                     continue
                 tile = pygame.image.load(
@@ -148,8 +120,8 @@ class GUI:
                 self.__screen.blit(tile, tile_rect)
 
         if not self.__game.should_continue():
-            self.__render_text(self.__height // 2, f"You won! Your time is {self.__game.get_time():0.4f}s" if self.__game.has_won(
-            ) else "You lost")
+            Text(self.__width // 2, self.__height // 2, f"You won! Your time is {self.__game.get_time():0.4f}s" if self.__game.has_won(
+            ) else "You lost").render(self.__screen)
 
         self.__last_state = state
 
@@ -164,10 +136,15 @@ class GUI:
         Renders game menu to the screen
         '''
         for i, difficulty in enumerate(self.__difficulty_presets.keys()):
-            self.__render_button(
-                self.__padding + i * self.__margin, difficulty, lambda: self.__start_game(difficulty))
-        self.__render_button(self.__padding + len(self.__difficulty_presets.keys())
-                             * self.__margin, "leaderboards", self.__toggle_list)
+            Button(self.__width // 2,
+                   self.__padding + i * self.__margin,
+                   difficulty,
+                   lambda: self.__start_game(difficulty)).render(self.__screen, self.__mouse)
+        Button(self.__width // 2,
+               self.__padding +
+               len(self.__difficulty_presets.keys()) * self.__margin,
+               "leaderboards",
+               self.__toggle_list).render(self.__screen, self.__mouse)
 
     def __render_list(self):
         '''
@@ -177,10 +154,15 @@ class GUI:
             self.__leaderboard: str = difficulty
 
         for i, difficulty in enumerate(self.__difficulty_presets.keys()):
-            self.__render_button(
-                self.__padding + i * self.__margin, f"{difficulty} leaderboard", lambda: set_leaderboard(difficulty))
-        self.__render_button(self.__padding + len(self.__difficulty_presets.keys())
-                             * self.__margin, "back", self.__toggle_list)
+            Button(self.__width // 2,
+                   self.__padding + i * self.__margin,
+                   f"{difficulty} leaderboard",
+                   lambda: set_leaderboard(difficulty)).render(self.__screen, self.__mouse)
+        Button(self.__width // 2,
+               self.__padding +
+               len(self.__difficulty_presets.keys()) * self.__margin,
+               "back",
+               self.__toggle_list).render(self.__screen, self.__mouse)
 
     def __get_menu(self):
         '''
@@ -216,7 +198,8 @@ class GUI:
                     self.__get_menu()
 
                 if event.key == pygame.K_r and self.__game:
-                    self.__game = Game(self.__rows, self.__cols, self.__mines)
+                    rows, cols, mines = self.__difficulty_presets[self.__difficulty]
+                    self.__game = Game(rows, cols, mines)
 
         self.__mouse.handle_events()
 
@@ -245,7 +228,7 @@ class GUI:
         Initializes a game according to the difficulty
         '''
         self.__difficulty = difficulty
-        self.__rows, self.__cols, self.__mines = self.__difficulty_presets[self.__difficulty]
+        rows, cols, mines = self.__difficulty_presets[difficulty]
         self.__set_screen_size(
-            self.__rows * self.__image_size, self.__cols * self.__image_size)
-        self.__game = Game(self.__rows, self.__cols, self.__mines)
+            rows * self.__image_size, cols * self.__image_size)
+        self.__game = Game(rows, cols, mines)
