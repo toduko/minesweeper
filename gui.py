@@ -7,6 +7,7 @@ import pygame
 
 from utils import get_image_from_tile_char, get_top_k_scores
 from button import Button
+from screen import Screen
 from mouse import Mouse
 from game import Game
 from text import Text
@@ -26,10 +27,7 @@ class GUI:
     __leaderboard_list: bool = False
     __padding: int = 80
     __margin: int = 60
-    __size: int = 0
-    __width: int = 0
-    __height: int = 0
-    __screen: pygame.Surface = None
+    __screen: Screen = Screen()
     __mouse: Mouse = Mouse()
 
     def __init__(self):
@@ -71,10 +69,10 @@ class GUI:
                     f"assets/{get_image_from_tile_char(state[i][j])}.png")
                 tile_rect = tile.get_rect()
                 tile_rect.x, tile_rect.y = i * self.__image_size, j * self.__image_size
-                self.__screen.blit(tile, tile_rect)
+                self.__screen.get_screen().blit(tile, tile_rect)
 
         if not self.__game.should_continue():
-            Text(self.__width // 2, self.__height // 2, f"You won! Your time is {self.__game.get_time():0.4f}s" if self.__game.has_won(
+            Text(self.__screen.get_width() // 2, self.__screen.get_height() // 2, f"You won! Your time is {self.__game.get_time():0.4f}s" if self.__game.has_won(
             ) else "You lost").render(self.__screen)
 
         self.__last_state = state
@@ -90,11 +88,11 @@ class GUI:
         Renders game menu to the screen
         '''
         for i, difficulty in enumerate(self.__difficulty_presets.keys()):
-            Button(self.__width // 2,
+            Button(self.__screen.get_width() // 2,
                    self.__padding + i * self.__margin,
                    difficulty,
                    lambda: self.__start_game(difficulty)).render(self.__screen, self.__mouse)
-        Button(self.__width // 2,
+        Button(self.__screen.get_width() // 2,
                self.__padding +
                len(self.__difficulty_presets.keys()) * self.__margin,
                "leaderboards",
@@ -108,11 +106,11 @@ class GUI:
             self.__leaderboard: str = difficulty
 
         for i, difficulty in enumerate(self.__difficulty_presets.keys()):
-            Button(self.__width // 2,
+            Button(self.__screen.get_width() // 2,
                    self.__padding + i * self.__margin,
                    f"{difficulty} leaderboard",
                    lambda: set_leaderboard(difficulty)).render(self.__screen, self.__mouse)
-        Button(self.__width // 2,
+        Button(self.__screen.get_width() // 2,
                self.__padding +
                len(self.__difficulty_presets.keys()) * self.__margin,
                "back",
@@ -131,7 +129,7 @@ class GUI:
         '''
         Renders leaderboard to the screen
         '''
-        self.__screen.fill((0, 0, 0))
+        self.__screen.get_screen().fill((0, 0, 0))
 
         try:
             top_scores = get_top_k_scores(10, self.__leaderboard)
@@ -139,26 +137,26 @@ class GUI:
             if not top_scores:
                 raise LookupError
 
-            self.__set_screen_size(
+            self.__screen.set_size(
                 640, (len(top_scores) + 2) * (self.__margin // 2) + 2 * self.__padding)
-            Text(self.__width // 2,
+            Text(self.__screen.get_width() // 2,
                  self.__padding, f"Top {self.__leaderboard} scores:").render(self.__screen)
             for i, score in enumerate(top_scores):
-                Text(self.__width // 2,
+                Text(self.__screen.get_width() // 2,
                      self.__padding + (i + 1) * self.__margin // 2, f"{i + 1} - {score:0.4f} seconds").render(self.__screen)
-            Text(self.__width // 2,
+            Text(self.__screen.get_width() // 2,
                  self.__padding + (len(top_scores) + 2) * self.__margin // 2, "Press ESCAPE to go back").render(self.__screen)
         except (FileNotFoundError, LookupError):
-            Text(self.__width // 2,
-                 self.__height // 2 - self.__margin // 2, "No scores found for this difficulty").render(self.__screen)
-            Text(self.__width // 2,
-                 self.__height // 2 + self.__margin // 2, "Press ESCAPE to go back").render(self.__screen)
+            Text(self.__screen.get_width() // 2,
+                 self.__screen.get_height() // 2 - self.__margin // 2, "No scores found for this difficulty").render(self.__screen)
+            Text(self.__screen.get_width() // 2,
+                 self.__screen.get_height() // 2 + self.__margin // 2, "Press ESCAPE to go back").render(self.__screen)
 
     def __set_menu_size(self):
         '''
         Sets the screen size to fit the menu
         '''
-        self.__set_screen_size(
+        self.__screen.set_size(
             640, self.__padding * 2 + (len(self.__difficulty_presets.keys()) + 1) * self.__margin)
 
     def __render(self):
@@ -191,19 +189,12 @@ class GUI:
 
         pygame.display.update()
 
-    def __set_screen_size(self, width: int, height: int):
-        '''
-        Sets screen size
-        '''
-        self.__size = self.__width, self.__height = width, height
-        self.__screen = pygame.display.set_mode(self.__size)
-
     def __start_game(self, difficulty: str):
         '''
         Initializes a game according to the difficulty
         '''
         self.__difficulty = difficulty
         rows, cols, mines = self.__difficulty_presets[difficulty]
-        self.__set_screen_size(
+        self.__screen.set_size(
             rows * self.__image_size, cols * self.__image_size)
         self.__game = Game(rows, cols, mines)

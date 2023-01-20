@@ -4,8 +4,8 @@ Button module
 
 from typing import Callable
 from pygame.draw import rect
-from pygame import Surface
 
+from screen import Screen
 from mouse import Mouse
 from text import Text
 
@@ -29,8 +29,8 @@ class Button:
         self.__text = Text(self.__x, self.__y, text.capitalize())
         self.__on_click = on_click
 
-    def render(self, screen: Surface, mouse: Mouse):
-        rect(screen, (100, 100, 100), [
+    def render(self, screen: Screen, mouse: Mouse):
+        rect(screen.get_screen(), (100, 100, 100), [
             self.__x - self.__width // 2,
             self.__y - self.__height // 2,
             self.__width,

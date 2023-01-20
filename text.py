@@ -3,7 +3,8 @@ Text module
 '''
 
 from pygame.font import Font, get_default_font
-from pygame import Surface
+
+from screen import Screen
 
 
 class Text:
@@ -22,8 +23,8 @@ class Text:
         self.__text = text
         self.__font = Font(get_default_font(), self.__font_size)
 
-    def render(self, screen: Surface):
+    def render(self, screen: Screen):
         text = self.__font.render(self.__text, (0, 0, 0), (255, 255, 255))
         text_rect = text.get_rect()
         text_rect.center = (self.__x, self.__y)
-        screen.blit(text, text_rect)
+        screen.get_screen().blit(text, text_rect)
