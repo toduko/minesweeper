@@ -6,6 +6,7 @@ import sys
 from typing import Callable
 import pygame
 
+from mouse import Mouse
 from game import Game
 
 
@@ -16,13 +17,7 @@ class GUI:
     '''
     __image_size: int = 32
     __font_size: int = 20
-    __left: bool = False
-    __right: bool = False
-    __timer_lclick: int = 0
-    __timer_rclick: int = 0
     __last_state: list[list[str]] = None
-    __lclick: bool = False
-    __rclick: bool = False
     __game: Game = None
     __difficulty_presets: dict[str, tuple[int, int, int]] = {"easy": (10, 10, 10), "medium": (
         16, 16, 40), "hard": (16, 30, 99)}
@@ -36,6 +31,7 @@ class GUI:
     __width: int = 0
     __height: int = 0
     __screen: pygame.Surface = None
+    __mouse: Mouse = Mouse()
 
     def __init__(self):
         pygame.init()
@@ -57,32 +53,12 @@ class GUI:
             self.__width // 2 - self.__button_width // 2, y - self.__button_height // 2, self.__button_width, self.__button_height])
         self.__render_text(y, title.capitalize())
 
-        mouse_x, mouse_y = pygame.mouse.get_pos()
-
-        if (self.__width // 2 - self.__button_width // 2) <= mouse_x <= (self.__width // 2 + self.__button_width // 2)\
-                and (y - self.__button_height // 2) <= mouse_y <= (y + self.__button_height // 2):
-            if self.__lclick:
-                on_click()
-
-    def __handle_mouse(self):
-        '''
-        Handles mouse up/down events
-        '''
-        self.__left, _, self.__right = pygame.mouse.get_pressed()
-
-        if self.__left:
-            self.__timer_lclick += 1
-        else:
-            if self.__timer_lclick > 100:
-                self.__lclick = True
-            self.__timer_lclick = 0
-
-        if self.__right:
-            self.__timer_rclick += 1
-        else:
-            if self.__timer_rclick > 100:
-                self.__rclick = True
-            self.__timer_rclick = 0
+        if (self.__mouse.is_in_square(self.__width // 2 - self.__button_width // 2,
+                                      self.__width // 2 + self.__button_width // 2,
+                                      y - self.__button_height // 2,
+                                      y + self.__button_height // 2)) \
+                and self.__mouse.is_left_clicked():
+            on_click()
 
     def __render_text(self, y: int, title: str):
         '''
@@ -146,10 +122,10 @@ class GUI:
         '''
         state = self.__game.repr()
 
-        pos = pygame.mouse.get_pos()
-        x, y = pos[0] // self.__image_size, pos[1] // self.__image_size
+        x, y = self.__mouse.get_pos()
+        x, y = x // self.__image_size, y // self.__image_size
 
-        if self.__lclick:
+        if self.__mouse.is_left_clicked():
             self.__game.show(x, y)
 
             if not self.__game.should_continue() and self.__game.has_won() and state != self.__game.repr():
@@ -158,7 +134,7 @@ class GUI:
                 file.write(str(time) + "\n")
                 file.close()
 
-        if self.__rclick:
+        if self.__mouse.is_right_clicked():
             self.__game.toggle_marked(x, y)
 
         for i in range(self.__rows):
@@ -242,7 +218,8 @@ class GUI:
                 if event.key == pygame.K_r and self.__game:
                     self.__game = Game(self.__rows, self.__cols, self.__mines)
 
-        self.__handle_mouse()
+        self.__mouse.handle_events()
+
         if self.__game:
             self.__render_game()
         elif self.__leaderboard is not None:
@@ -252,7 +229,7 @@ class GUI:
         else:
             self.__render_menu()
 
-        self.__lclick = self.__rclick = False
+        self.__mouse.cleanup()
 
         pygame.display.update()
 
