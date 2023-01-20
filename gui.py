@@ -5,6 +5,7 @@ GUI module
 import sys
 import pygame
 
+from utils import get_image_from_tile_char, get_top_k_scores
 from button import Button
 from mouse import Mouse
 from game import Game
@@ -41,50 +42,6 @@ class GUI:
         while True:
             self.__render()
 
-    def __get_top_k_scores(self, k: int):
-        '''
-        Renders the top scores of screen
-        '''
-        self.__screen.fill((0, 0, 0))
-
-        try:
-            with open(self.__leaderboard, "r", encoding="utf-8") as file:
-                top_scores = sorted(list(map(float, filter(lambda x: x.replace(
-                    '.', '', 1).isdigit(), file.read().split("\n")))))[:k]
-
-                if not top_scores:
-                    raise LookupError
-
-                self.__set_screen_size(
-                    640, (len(top_scores) + 2) * (self.__margin // 2) + 2 * self.__padding)
-                Text(self.__width // 2,
-                     self.__padding, f"Top {self.__leaderboard} scores:").render(self.__screen)
-                for i, score in enumerate(top_scores):
-                    Text(self.__width // 2,
-                         self.__padding + (i + 1) * self.__margin // 2, f"{i + 1} - {score:0.4f} seconds").render(self.__screen)
-                Text(self.__width // 2,
-                     self.__padding + (len(top_scores) + 2) * self.__margin // 2, "Press ESCAPE to go back").render(self.__screen)
-        except (FileNotFoundError, LookupError):
-            Text(self.__width // 2,
-                 self.__height // 2 - self.__margin // 2, "No scores found for this difficulty").render(self.__screen)
-            Text(self.__width // 2,
-                 self.__height // 2 + self.__margin // 2, "Press ESCAPE to go back").render(self.__screen)
-
-    def __get_image_from_tile_char(self, char: str):
-        '''
-        Get image filename from char representation of tile
-        '''
-        if char == '#':
-            return "hidden"
-        elif char == 'P':
-            return "flag"
-        elif char == '*':
-            return "mine"
-        elif char == ' ':
-            return "0"
-        else:
-            return char
-
     def __render_game(self):
         '''
         Renders a minesweeper game on the screen
@@ -111,7 +68,7 @@ class GUI:
                 if self.__last_state and self.__last_state[i][j] == state[i][j]:
                     continue
                 tile = pygame.image.load(
-                    f"assets/{self.__get_image_from_tile_char(state[i][j])}.png")
+                    f"assets/{get_image_from_tile_char(state[i][j])}.png")
                 tile_rect = tile.get_rect()
                 tile_rect.x, tile_rect.y = i * self.__image_size, j * self.__image_size
                 self.__screen.blit(tile, tile_rect)
@@ -174,7 +131,28 @@ class GUI:
         '''
         Renders leaderboard to the screen
         '''
-        self.__get_top_k_scores(10)
+        self.__screen.fill((0, 0, 0))
+
+        try:
+            top_scores = get_top_k_scores(10, self.__leaderboard)
+
+            if not top_scores:
+                raise LookupError
+
+            self.__set_screen_size(
+                640, (len(top_scores) + 2) * (self.__margin // 2) + 2 * self.__padding)
+            Text(self.__width // 2,
+                 self.__padding, f"Top {self.__leaderboard} scores:").render(self.__screen)
+            for i, score in enumerate(top_scores):
+                Text(self.__width // 2,
+                     self.__padding + (i + 1) * self.__margin // 2, f"{i + 1} - {score:0.4f} seconds").render(self.__screen)
+            Text(self.__width // 2,
+                 self.__padding + (len(top_scores) + 2) * self.__margin // 2, "Press ESCAPE to go back").render(self.__screen)
+        except (FileNotFoundError, LookupError):
+            Text(self.__width // 2,
+                 self.__height // 2 - self.__margin // 2, "No scores found for this difficulty").render(self.__screen)
+            Text(self.__width // 2,
+                 self.__height // 2 + self.__margin // 2, "Press ESCAPE to go back").render(self.__screen)
 
     def __set_menu_size(self):
         '''
