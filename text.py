@@ -24,6 +24,9 @@ class Text:
         self.__font = Font(get_default_font(), self.__font_size)
 
     def render(self, screen: Screen):
+        '''
+        Renders text to the screen
+        '''
         text = self.__font.render(self.__text, (0, 0, 0), (255, 255, 255))
         text_rect = text.get_rect()
         text_rect.center = (self.__x, self.__y)

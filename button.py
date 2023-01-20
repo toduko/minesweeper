@@ -30,6 +30,9 @@ class Button:
         self.__on_click = on_click
 
     def render(self, screen: Screen, mouse: Mouse):
+        '''
+        Renders button to the screen
+        '''
         rect(screen.get_screen(), (100, 100, 100), [
             self.__x - self.__width // 2,
             self.__y - self.__height // 2,
