@@ -153,7 +153,7 @@ class Board:
         '''
         for dx in [-1, 0, 1]:
             for dy in [-1, 0, 1]:
-                if (dx != dy):
+                if dx != dy:
                     self.__check_for_neighbours(x + dx, y + dy)
 
     def show(self, x: int, y: int):

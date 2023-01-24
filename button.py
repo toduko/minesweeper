@@ -21,7 +21,13 @@ class Button:
     __text: Text
     __on_click: Callable[[], None]
 
-    def __init__(self, x: int, y: int, text: str, on_click: Callable[[], None], width: int = 240, height: int = 30):
+    def __init__(self,
+                 x: int,
+                 y: int,
+                 text: str,
+                 on_click: Callable[[], None],
+                 width: int = 240,
+                 height: int = 30):
         self.__x = x
         self.__y = y
         self.__width = width

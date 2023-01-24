@@ -32,7 +32,10 @@ class CLI:
         instr, *args = cmd.split(' ')
 
         def should_accept_cmd(expected_num_args: int = 2) -> bool:
-            if instr.lower() == "new" and not Board.is_valid_board(int(args[0]), int(args[1]), int(args[2])):
+            if instr.lower() == "new" and \
+                    not Board.is_valid_board(int(args[0]),
+                                             int(args[1]),
+                                             int(args[2])):
                 print("Not a valid game")
                 return False
 

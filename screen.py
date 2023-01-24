@@ -7,6 +7,9 @@ from pygame.display import set_mode
 
 
 class Screen:
+    '''
+    This class is used to managy the screen
+    '''
     __screen: Surface
     __width: int
     __height: int

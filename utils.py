@@ -9,14 +9,13 @@ def get_image_from_tile_char(char: str):
     '''
     if char == '#':
         return "hidden"
-    elif char == 'P':
+    if char == 'P':
         return "flag"
-    elif char == '*':
+    if char == '*':
         return "mine"
-    elif char == ' ':
+    if char == ' ':
         return "0"
-    else:
-        return char
+    return char
 
 
 def get_top_k_scores(k: int, difficulty: str):

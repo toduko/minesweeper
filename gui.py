@@ -2,6 +2,7 @@
 GUI module
 '''
 
+from functools import partial
 import sys
 import pygame
 
@@ -21,6 +22,7 @@ class GUI:
     __image_size: int = 32
     __last_state: list[list[str]] = None
     __game: Game = None
+    __difficulty: str = ""
     __difficulty_presets: dict[str, tuple[int, int, int]] = {"easy": (10, 10, 10), "medium": (
         16, 16, 40), "hard": (16, 30, 99)}
     __leaderboard: str = None
@@ -52,7 +54,9 @@ class GUI:
         if self.__mouse.is_left_clicked():
             self.__game.show(x, y)
 
-            if not self.__game.should_continue() and self.__game.has_won() and state != self.__game.repr():
+            if not self.__game.should_continue() and\
+                    self.__game.has_won() and\
+            state != self.__game.repr():
                 with open(self.__difficulty, "a", encoding="utf-8") as file:
                     file.write(str(self.__game.get_time()) + "\n")
 
@@ -72,7 +76,10 @@ class GUI:
                 self.__screen.get_screen().blit(tile, tile_rect)
 
         if not self.__game.should_continue():
-            Text(self.__screen.get_width() // 2, self.__screen.get_height() // 2, f"You won! Your time is {self.__game.get_time():0.4f}s" if self.__game.has_won(
+            Text(self.__screen.get_width() // 2,
+                 self.__screen.get_height() // 2,
+                 f"You won! Your time is {self.__game.get_time():0.4f}s"
+                 if self.__game.has_won(
             ) else "You lost").render(self.__screen)
 
         self.__last_state = state
@@ -91,7 +98,7 @@ class GUI:
             Button(self.__screen.get_width() // 2,
                    self.__padding + i * self.__margin,
                    difficulty,
-                   lambda: self.__start_game(difficulty)).render(self.__screen, self.__mouse)
+                   partial(self.__start_game, difficulty)).render(self.__screen, self.__mouse)
         Button(self.__screen.get_width() // 2,
                self.__padding +
                len(self.__difficulty_presets.keys()) * self.__margin,
@@ -109,7 +116,7 @@ class GUI:
             Button(self.__screen.get_width() // 2,
                    self.__padding + i * self.__margin,
                    f"{difficulty} leaderboard",
-                   lambda: set_leaderboard(difficulty)).render(self.__screen, self.__mouse)
+                   partial(set_leaderboard, difficulty)).render(self.__screen, self.__mouse)
         Button(self.__screen.get_width() // 2,
                self.__padding +
                len(self.__difficulty_presets.keys()) * self.__margin,
@@ -143,14 +150,18 @@ class GUI:
                  self.__padding, f"Top {self.__leaderboard} scores:").render(self.__screen)
             for i, score in enumerate(top_scores):
                 Text(self.__screen.get_width() // 2,
-                     self.__padding + (i + 1) * self.__margin // 2, f"{i + 1} - {score:0.4f} seconds").render(self.__screen)
+                     self.__padding + (i + 1) * self.__margin // 2,
+                     f"{i + 1} - {score:0.4f} seconds").render(self.__screen)
             Text(self.__screen.get_width() // 2,
-                 self.__padding + (len(top_scores) + 2) * self.__margin // 2, "Press ESCAPE to go back").render(self.__screen)
+                 self.__padding + (len(top_scores) + 2) * self.__margin // 2,
+                 "Press ESCAPE to go back").render(self.__screen)
         except (FileNotFoundError, LookupError):
             Text(self.__screen.get_width() // 2,
-                 self.__screen.get_height() // 2 - self.__margin // 2, "No scores found for this difficulty").render(self.__screen)
+                 self.__screen.get_height() // 2 - self.__margin // 2,
+                 "No scores found for this difficulty").render(self.__screen)
             Text(self.__screen.get_width() // 2,
-                 self.__screen.get_height() // 2 + self.__margin // 2, "Press ESCAPE to go back").render(self.__screen)
+                 self.__screen.get_height() // 2 + self.__margin // 2,
+                 "Press ESCAPE to go back").render(self.__screen)
 
     def __set_menu_size(self):
         '''
