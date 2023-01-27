@@ -11,8 +11,8 @@ class Tile:
     Also information on neighbouring mines can be stored.
     '''
 
-    def __init__(self):
-        self.__mine: bool = False
+    def __init__(self, is_mine: bool):
+        self.__is_mine: bool = is_mine
         self.__hidden: bool = True
         self.__marked: bool = False
 
@@ -42,14 +42,8 @@ class Tile:
         if self.__hidden:
             self.__marked ^= True
 
-    def set_mine(self):
-        '''
-        Sets the tile to a mine
-        '''
-        self.__mine = True
-
     def is_mine(self) -> bool:
         '''
         Checks if the tile is a mine
         '''
-        return self.__mine
+        return self.__is_mine

@@ -22,8 +22,8 @@ class Board:
         self.__started: bool = False
         self.__lose: bool = False
         self.__discovered: int = 0
-        self.__board: list[list[Tile]] = [[Tile()
-                                          for _ in range(rows)] for _ in range(cols)]
+        self.__board: list[list[Tile | None]] = [[None
+                                                  for _ in range(rows)] for _ in range(cols)]
         self.__neighbouring_mines: list[list[int]] = [
             [0 for _ in range(cols)] for _ in range(rows)]
 
@@ -43,8 +43,7 @@ class Board:
 
         for i in range(self.__rows):
             for j in range(self.__cols):
-                if (i, j) in mine_coords:
-                    self.__board[i][j].set_mine()
+                self.__board[i][j] = Tile((i, j) in mine_coords)
 
     def get_rows(self) -> int:
         '''
@@ -177,6 +176,8 @@ class Board:
         Returns a mxn array of character representations of the tiles
         '''
         def helper(tile: Tile, x: int, y: int) -> str:
+            if not tile:
+                return '#'
             if tile.is_marked():
                 return 'P'
             if tile.is_hidden():
