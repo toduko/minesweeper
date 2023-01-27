@@ -1,8 +1,11 @@
 lint:
     @python -m pylint src
 
+test:
+    @python -m pytest -s
+
 gui:
-    @python src/minesweeper.py gui
+    @python -m src.minesweeper gui
 
 cli:
-    @python src/minesweeper.py cli
+    @python -m src.minesweeper cli

@@ -6,12 +6,12 @@ from functools import partial
 import sys
 import pygame
 
-from utils import get_image_from_tile_char, get_top_k_scores
-from button import Button
-from screen import Screen
-from mouse import Mouse
-from game import Game
-from text import Text
+from src.utils import get_image_from_tile_char, get_top_k_scores
+from src.button import Button
+from src.screen import Screen
+from src.mouse import Mouse
+from src.game import Game
+from src.text import Text
 
 
 class GUI:

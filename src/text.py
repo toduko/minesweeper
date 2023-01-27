@@ -4,7 +4,7 @@ Text module
 
 from pygame.font import Font, get_default_font
 
-from screen import Screen
+from src.screen import Screen
 
 
 class Text:

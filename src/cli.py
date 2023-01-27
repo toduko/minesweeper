@@ -3,8 +3,8 @@ CLI module
 '''
 
 
-from game import Game
-from board import Board
+from src.game import Game
+from src.board import Board
 
 
 class CLI:

@@ -4,7 +4,7 @@ Board module
 
 from itertools import product
 from random import randint
-from tile import Tile
+from src.tile import Tile
 
 
 class Board:
@@ -57,7 +57,10 @@ class Board:
                 if self.__valid_coords(x + dx, y + dy):
                     forbidden.add((x + dx, y + dy))
 
-        mine_coords = self.__generate_mine_coords(forbidden)
+        mine_coords = Board.generate_mine_coords(self.__rows,
+                                                 self.__cols,
+                                                 self.__num_mines,
+                                                 forbidden)
 
         for i in range(self.__rows):
             for j in range(self.__cols):
@@ -113,14 +116,21 @@ class Board:
                             and self.__board[x][y].is_mine():
                         self.__neighbouring_mines[x + dx][y + dy] += 1
 
-    def __generate_mine_coords(self, forbidden: tuple[int, int]) -> set[tuple[int, int]]:
+    @staticmethod
+    def generate_mine_coords(rows: int,
+                             cols: int,
+                             num_mines: int,
+                             forbidden: tuple[int, int]) -> set[tuple[int, int]]:
         '''
         Generates a fixed amount of mines on non-forbidden coordinates
         '''
+        if rows * cols < num_mines or ((len(forbidden) + num_mines) / (rows * cols)) > 1:
+            raise Exception("Invalid data")
+
         mine_coords: set[tuple[int, int]] = set()
 
-        while len(mine_coords) < self.__num_mines:
-            x, y = randint(0, self.__rows - 1), randint(0, self.__cols - 1)
+        while len(mine_coords) < num_mines:
+            x, y = randint(0, rows - 1), randint(0, cols - 1)
             if (x, y) not in forbidden:
                 mine_coords.add((x, y))
 
