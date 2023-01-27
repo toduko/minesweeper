@@ -22,30 +22,29 @@ class Board:
         self.__started: bool = False
         self.__lose: bool = False
         self.__discovered: int = 0
-        self.__forbidden: set[tuple[int, int]] = set()
         self.__board: list[list[Tile]] = [[Tile()
-                                          for _ in range(self.__cols)] for _ in range(self.__rows)]
+                                          for _ in range(rows)] for _ in range(cols)]
+        self.__neighbouring_mines: list[list[int]] = [
+            [0 for _ in range(cols)] for _ in range(rows)]
 
     def __begin_game(self, x: int, y: int):
         '''
         Starts a game from showing the board[x][y] tile.
         Bombs can't be placed near board[x][y].
         '''
-        self.__forbidden = set()
+        forbidden: tuple[int, int] = set()
 
         for dx in [-1, 0, 1]:
             for dy in [-1, 0, 1]:
                 if self.__valid_coords(x + dx, y + dy):
-                    self.__forbidden.add((x + dx, y + dy))
+                    forbidden.add((x + dx, y + dy))
 
-        mine_coords = self.__generate_mine_coords()
+        mine_coords = self.__generate_mine_coords(forbidden)
 
         for i in range(self.__rows):
             for j in range(self.__cols):
                 if (i, j) in mine_coords:
                     self.__board[i][j].set_mine()
-
-        self.__calculate_neighbour_mines()
 
     def get_rows(self) -> int:
         '''
@@ -83,24 +82,7 @@ class Board:
         '''
         return not self.__lose and self.__discovered != self.__rows * self.__cols - self.__num_mines
 
-    def __calculate_neighbour_mines(self):
-        '''
-        Calculates the amount of neighbour mines for all tiles
-        '''
-        for x in range(self.__rows):
-            for y in range(self.__cols):
-                count = 0
-
-                for dx in [-1, 0, 1]:
-                    for dy in [-1, 0, 1]:
-                        if (dx, dy) != (0, 0) and \
-                            self.__valid_coords(x + dx, y + dy) and \
-                                self.__board[x + dx][y + dy].is_mine():
-                            count += 1
-
-                self.__board[x][y].set_neighbour_mines(count)
-
-    def __generate_mine_coords(self) -> set[tuple[int, int]]:
+    def __generate_mine_coords(self, forbidden: tuple[int, int]) -> set[tuple[int, int]]:
         '''
         Generates a fixed amount of mines on non-forbidden coordinates
         '''
@@ -108,8 +90,13 @@ class Board:
 
         while len(mine_coords) < self.__num_mines:
             x, y = randint(0, self.__rows - 1), randint(0, self.__cols - 1)
-            if (x, y) not in self.__forbidden:
+            if (x, y) not in forbidden:
                 mine_coords.add((x, y))
+                for dx in [-1, 0, 1]:
+                    for dy in [-1, 0, 1]:
+                        if self.__valid_coords(x + dx, y + dy)\
+                                and (dx, dy) != (0, 0):
+                            self.__neighbouring_mines[x + dx][y + dy] += 1
 
         return mine_coords
 
@@ -144,7 +131,7 @@ class Board:
 
             if tile.is_mine():
                 self.__lose = True
-            elif not tile.get_neighbour_mines():
+            elif not self.__neighbouring_mines[x][y]:
                 self.__show_neighbours(x, y)
 
     def __show_neighbours(self, x: int, y: int):
@@ -189,4 +176,16 @@ class Board:
         '''
         Returns a mxn array of character representations of the tiles
         '''
-        return [[repr(tile) for tile in row] for row in self.__board]
+        def helper(tile: Tile, x: int, y: int) -> str:
+            if tile.is_marked():
+                return 'P'
+            if tile.is_hidden():
+                return '#'
+            if tile.is_mine():
+                return '*'
+
+            return ' ' if not self.__neighbouring_mines[x][y]\
+                else str(self.__neighbouring_mines[x][y])
+
+        return [[helper(tile, row, col) for col, tile in enumerate(tile_row)]
+                for row, tile_row in enumerate(self.__board)]

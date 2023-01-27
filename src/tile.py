@@ -15,7 +15,6 @@ class Tile:
         self.__mine: bool = False
         self.__hidden: bool = True
         self.__marked: bool = False
-        self.__neighbour_mines: int = 0
 
     def is_hidden(self) -> bool:
         '''
@@ -54,24 +53,3 @@ class Tile:
         Checks if the tile is a mine
         '''
         return self.__mine
-
-    def get_neighbour_mines(self) -> int:
-        '''
-        Returns the amount of neighbouring mines
-        '''
-        return self.__neighbour_mines
-
-    def set_neighbour_mines(self, amount: int):
-        '''
-        Sets the amount of neighbouring mines
-        '''
-        self.__neighbour_mines = amount
-
-    def __repr__(self) -> str:
-        if self.__marked:
-            return 'P'
-        if self.__hidden:
-            return '#'
-        if self.__mine:
-            return '*'
-        return ' ' if self.__neighbour_mines == 0 else str(self.__neighbour_mines)
