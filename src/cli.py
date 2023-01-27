@@ -65,7 +65,7 @@ class CLI:
 
             print(
                 f"Starting a new game with {args[0]} rows, {args[1]} columns and {args[2]} mines")
-            self.__game = Game(int(args[0]), int(args[1]), int(args[2]))
+            self.__game = Game((int(args[0]), int(args[1]), int(args[2])))
             self.__game.print()
         elif instr.lower() == "show":
             if not should_accept_cmd():

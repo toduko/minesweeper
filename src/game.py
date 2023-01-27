@@ -4,6 +4,7 @@ Game module
 
 from time import perf_counter
 from board import Board
+from tile import Tile
 
 
 class Game:
@@ -12,8 +13,8 @@ class Game:
     It stores information about the time a game took to finish.
     '''
 
-    def __init__(self, rows: int, cols: int, num_mines: int):
-        self.__board: Board = Board(rows, cols, num_mines)
+    def __init__(self, board_info: tuple[int, int, int] | list[list[Tile]]):
+        self.__board: Board = Board(board_info)
         self.__start_time: float = perf_counter()
         self.__end_time: float = perf_counter()
 

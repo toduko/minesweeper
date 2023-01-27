@@ -2,6 +2,7 @@
 Board module
 '''
 
+from itertools import product
 from random import randint
 from tile import Tile
 
@@ -12,20 +13,37 @@ class Board:
     It provides an interface for interacting with all of the tiles.
     '''
 
-    def __init__(self, rows: int, cols: int, num_mines: int):
-        if not self.is_valid_board(rows, cols, num_mines):
-            raise Exception("Invalid board")
-
-        self.__rows: int = rows
-        self.__cols: int = cols
-        self.__num_mines: int = num_mines
-        self.__started: bool = False
+    def __init__(self, board_info: tuple[int, int, int] | list[list[Tile]]):
         self.__lose: bool = False
         self.__discovered: int = 0
-        self.__board: list[list[Tile | None]] = [[None
-                                                  for _ in range(rows)] for _ in range(cols)]
+
+        if isinstance(board_info, tuple):
+            rows, cols, num_mines = board_info
+            self.__rows: int = rows
+            self.__cols: int = cols
+            self.__num_mines: int = num_mines
+            self.__started: bool = False
+            self.__board: list[list[Tile | None]] = [[None
+                                                      for _ in range(rows)] for _ in range(cols)]
+            self.__neighbouring_mines: list[list[int]] = [
+                [0 for _ in range(cols)] for _ in range(rows)]
+            return
+
+        self.__rows, self.__cols = len(board_info), len(board_info[0])
+        self.__num_mines = sum(map(sum, [[1 if tile.is_mine()
+                                          else 0 for tile in row]
+                                         for row in board_info]))
+
+        if not self.is_valid_board(self.__rows,
+                                   self.__cols,
+                                   self.__num_mines):
+            raise Exception("Invalid board")
+
         self.__neighbouring_mines: list[list[int]] = [
-            [0 for _ in range(cols)] for _ in range(rows)]
+            [0 for _ in range(self.__cols)] for _ in range(self.__rows)]
+        self.__board = board_info
+        self.__started = True
+        self.__calculate_neighbouring_mines()
 
     def __begin_game(self, x: int, y: int):
         '''
@@ -44,6 +62,8 @@ class Board:
         for i in range(self.__rows):
             for j in range(self.__cols):
                 self.__board[i][j] = Tile((i, j) in mine_coords)
+
+        self.__calculate_neighbouring_mines()
 
     def get_rows(self) -> int:
         '''
@@ -81,6 +101,18 @@ class Board:
         '''
         return not self.__lose and self.__discovered != self.__rows * self.__cols - self.__num_mines
 
+    def __calculate_neighbouring_mines(self):
+        for x in range(self.__rows):
+            for y in range(self.__cols):
+                for dx, dy in product([-1, 0, 1], [-1, 0, 1]):
+                    if self.__valid_coords(
+                        x + dx,
+                        y + dy) \
+                            and (dx, dy) != (0, 0) \
+                            and self.__board[x][y] \
+                            and self.__board[x][y].is_mine():
+                        self.__neighbouring_mines[x + dx][y + dy] += 1
+
     def __generate_mine_coords(self, forbidden: tuple[int, int]) -> set[tuple[int, int]]:
         '''
         Generates a fixed amount of mines on non-forbidden coordinates
@@ -91,11 +123,6 @@ class Board:
             x, y = randint(0, self.__rows - 1), randint(0, self.__cols - 1)
             if (x, y) not in forbidden:
                 mine_coords.add((x, y))
-                for dx in [-1, 0, 1]:
-                    for dy in [-1, 0, 1]:
-                        if self.__valid_coords(x + dx, y + dy)\
-                                and (dx, dy) != (0, 0):
-                            self.__neighbouring_mines[x + dx][y + dy] += 1
 
         return mine_coords
 
@@ -164,29 +191,30 @@ class Board:
 
         self.__board[x][y].toggle_marked()
 
+    def __tile_repr(self, tile: Tile, x: int, y: int) -> str:
+        if not tile:
+            return '#'
+        if tile.is_marked():
+            return 'P'
+        if tile.is_hidden():
+            return '#'
+        if tile.is_mine():
+            return '*'
+
+        return ' ' if not self.__neighbouring_mines[x][y]\
+            else str(self.__neighbouring_mines[x][y])
+
     def print(self):
         '''
         Prints the board
         '''
-        for row in self.__board:
-            print(row)
+        for row in self.repr():
+            print(" ".join(row))
 
     def repr(self) -> list[list[str]]:
         '''
         Returns a mxn array of character representations of the tiles
         '''
-        def helper(tile: Tile, x: int, y: int) -> str:
-            if not tile:
-                return '#'
-            if tile.is_marked():
-                return 'P'
-            if tile.is_hidden():
-                return '#'
-            if tile.is_mine():
-                return '*'
 
-            return ' ' if not self.__neighbouring_mines[x][y]\
-                else str(self.__neighbouring_mines[x][y])
-
-        return [[helper(tile, row, col) for col, tile in enumerate(tile_row)]
+        return [[self.__tile_repr(tile, row, col) for col, tile in enumerate(tile_row)]
                 for row, tile_row in enumerate(self.__board)]

@@ -183,7 +183,7 @@ class GUI:
 
                 if event.key == pygame.K_r and self.__game:
                     rows, cols, mines = self.__difficulty_presets[self.__difficulty]
-                    self.__game = Game(rows, cols, mines)
+                    self.__game = Game((rows, cols, mines))
 
         self.__mouse.handle_events()
 
@@ -208,4 +208,4 @@ class GUI:
         rows, cols, mines = self.__difficulty_presets[difficulty]
         self.__screen.set_size(
             rows * self.__image_size, cols * self.__image_size)
-        self.__game = Game(rows, cols, mines)
+        self.__game = Game((rows, cols, mines))
