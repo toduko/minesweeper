@@ -2,13 +2,12 @@
 GUI module
 '''
 
-from functools import partial
 import sys
 import pygame
 
 from src.utils import get_image_from_tile_char
 from src.leaderboard_menu import LeaderboardMenu
-from src.button import Button
+from src.difficulty_select import DifficultySelect
 from src.screen import Screen
 from src.mouse import Mouse
 from src.menu_state import MenuState, State
@@ -31,6 +30,7 @@ class GUI:
     __screen: Screen = Screen()
     __mouse: Mouse = Mouse()
     __state: MenuState = MenuState()
+    __difficulty_select: DifficultySelect = DifficultySelect()
 
     def __init__(self):
         pygame.init()
@@ -83,31 +83,6 @@ class GUI:
 
         self.__last_state = state
 
-    def __toggle_list(self):
-        '''
-        Toggles whether the leaderboards list is shown or not
-        '''
-        if self.__state.get_state() == State.DIFFICULTY_SELECT:
-            self.__state.set_state(State.LEADERBOARD_SELECT)
-        elif self.__state.get_state() == State.LEADERBOARD_SELECT:
-            self.__state.set_state(State.DIFFICULTY_SELECT)
-
-    def __render_menu(self):
-        '''
-        Renders game menu to the screen
-        '''
-        for i, difficulty in enumerate(self.__difficulty_presets.keys()):
-            Button(self.__screen.get_width() // 2,
-                   self.__screen.get_padding() + i * self.__screen.get_margin(),
-                   difficulty,
-                   partial(self.__start_game, difficulty)).render(self.__screen, self.__mouse)
-        Button(self.__screen.get_width() // 2,
-               self.__screen.get_padding() +
-               len(self.__difficulty_presets.keys()) *
-               self.__screen.get_margin(),
-               "leaderboards",
-               self.__toggle_list).render(self.__screen, self.__mouse)
-
     def __get_menu(self):
         '''
         Updates the state so that the next render the menu is shown
@@ -141,7 +116,12 @@ class GUI:
         if self.__state.get_state() == State.GAME:
             self.__render_game()
         elif self.__state.get_state() == State.DIFFICULTY_SELECT:
-            self.__render_menu()
+            self.__difficulty_select.render(self.__screen,
+                                            self.__mouse,
+                                            self.__state,
+                                            self.__difficulty_presets,
+                                            self.__start_game)
+
         else:
             self.__leaderboard_menu.render(self.__screen,
                                            self.__mouse,
