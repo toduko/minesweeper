@@ -29,7 +29,11 @@ class DifficultySelect:
             Button(screen.get_width() // 2,
                    screen.get_padding() + i * screen.get_margin(),
                    difficulty,
-                   partial(start_game, difficulty)).render(screen, mouse)
+                   partial(start_game,
+                           screen,
+                           state,
+                           difficulty_presets[difficulty],
+                           difficulty)).render(screen, mouse)
         Button(screen.get_width() // 2,
                screen.get_padding() +
                len(difficulty_presets.keys()) *

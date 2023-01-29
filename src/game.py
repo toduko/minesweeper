@@ -18,6 +18,12 @@ class Game:
         self.__start_time: float = perf_counter()
         self.__end_time: float = perf_counter()
 
+    def restart(self):
+        '''
+        Restarts game
+        '''
+        self.__board.restart()
+
     def show(self, x: int, y: int):
         '''
         Shows a selected tile.
