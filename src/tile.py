@@ -2,6 +2,8 @@
 Tile module
 '''
 
+from __future__ import annotations
+
 
 class Tile:
     '''
@@ -15,6 +17,22 @@ class Tile:
         self.__is_mine: bool = is_mine
         self.__hidden: bool = True
         self.__marked: bool = False
+
+    @staticmethod
+    def repr(tile: Tile, neighbouring_mines):
+        '''
+        Returns the char representation of a tile
+        '''
+        if not tile:
+            return '#'
+        if tile.is_marked():
+            return 'P'
+        if tile.is_hidden():
+            return '#'
+        if tile.is_mine():
+            return '*'
+
+        return ' ' if not neighbouring_mines else str(neighbouring_mines)
 
     def is_hidden(self) -> bool:
         '''

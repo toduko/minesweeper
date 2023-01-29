@@ -221,19 +221,6 @@ class Board:
 
         self.__board[x][y].toggle_marked()
 
-    def __tile_repr(self, tile: Tile, x: int, y: int) -> str:
-        if not tile:
-            return '#'
-        if tile.is_marked():
-            return 'P'
-        if tile.is_hidden():
-            return '#'
-        if tile.is_mine():
-            return '*'
-
-        return ' ' if not self.__neighbouring_mines[x][y]\
-            else str(self.__neighbouring_mines[x][y])
-
     def print(self):
         '''
         Prints the board
@@ -245,5 +232,6 @@ class Board:
         '''
         Returns a mxn array of character representations of the tiles
         '''
-        return [[self.__tile_repr(tile, row, col) for col, tile in enumerate(tile_row)]
+        return [[Tile.repr(tile, self.__neighbouring_mines[row][col])
+                for col, tile in enumerate(tile_row)]
                 for row, tile_row in enumerate(self.__board)]
