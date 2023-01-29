@@ -98,6 +98,12 @@ class Board:
         '''
         return not (self.should_continue() or self.__lose)
 
+    def has_lost(self):
+        '''
+        Checks if the game was won
+        '''
+        return self.__lose
+
     def should_continue(self):
         '''
         Checks if any more moves can be made

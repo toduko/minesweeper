@@ -45,7 +45,7 @@ def test_losing_a_game():
                 game.show(x, y)
                 break
 
-    assert not game.should_continue() and not game.has_won()
+    assert not game.should_continue() and game.has_lost()
 
 
 def test_timer():

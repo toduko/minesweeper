@@ -51,6 +51,12 @@ class Game:
         '''
         return self.__board.has_won()
 
+    def has_lost(self) -> bool:
+        '''
+        Checks if the game was lost
+        '''
+        return self.__board.has_lost()
+
     def get_time(self) -> float:
         '''
         Gets the time it took to complete the game

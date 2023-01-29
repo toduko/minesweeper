@@ -54,9 +54,7 @@ class GUI:
         if self.__mouse.is_left_clicked():
             self.__game.show(x, y)
 
-            if not self.__game.should_continue() and\
-                    self.__game.has_won() and\
-            state != self.__game.repr():
+            if self.__game.has_won() and state != self.__game.repr():
                 with open(self.__difficulty, "a", encoding="utf-8") as file:
                     file.write(str(self.__game.get_time()) + "\n")
 
