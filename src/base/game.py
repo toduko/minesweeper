@@ -3,8 +3,8 @@ Game module
 '''
 
 from time import perf_counter
-from src.board import Board
-from src.tile import Tile
+from src.base.board import Board
+from src.base.tile import Tile
 
 
 class Game:

@@ -2,8 +2,8 @@
 Board tests
 '''
 from random import randint
-from src.board import Board
-from src.tile import Tile
+from src.base.board import Board
+from src.base.tile import Tile
 
 ROWS: int = 50
 COLS: int = 50

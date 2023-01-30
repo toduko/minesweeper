@@ -5,10 +5,10 @@ DifficultySelect module
 from functools import partial
 from typing import Callable
 
-from src.menu_state import MenuState, State
-from src.screen import Screen
-from src.button import Button
-from src.mouse import Mouse
+from src.ui.menu_state import MenuState, State
+from src.ui.screen import Screen
+from src.ui.button import Button
+from src.ui.mouse import Mouse
 
 
 class DifficultySelect:

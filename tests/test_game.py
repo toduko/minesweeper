@@ -4,9 +4,9 @@ Game tests
 
 from time import perf_counter
 from random import randint
-from src.game import Game
-from src.tile import Tile
-from src.board import Board
+from src.base.game import Game
+from src.base.tile import Tile
+from src.base.board import Board
 
 ROWS: int = 50
 COLS: int = 50

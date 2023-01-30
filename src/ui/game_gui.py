@@ -4,12 +4,11 @@ Game GUI module
 
 import pygame
 
-from src.utils import get_image_from_tile_char
-from src.menu_state import MenuState, State
-from src.game import Game
-from src.text import Text
-from src.mouse import Mouse
-from src.screen import Screen
+from src.ui.menu_state import MenuState, State
+from src.base.game import Game
+from src.ui.text import Text
+from src.ui.mouse import Mouse
+from src.ui.screen import Screen
 
 
 class GameGUI:
@@ -20,6 +19,20 @@ class GameGUI:
     __last_state: list[list[str]] | None = None
     __game: Game | None = None
     __difficulty: str = ""
+
+    def __get_image_from_tile_char(self, char: str):
+        '''
+        Get image filename from char representation of tile
+        '''
+        if char == '#':
+            return "hidden"
+        if char == 'P':
+            return "flag"
+        if char == '*':
+            return "mine"
+        if char == ' ':
+            return "0"
+        return char
 
     def render(self, screen: Screen, mouse: Mouse):
         '''
@@ -46,7 +59,7 @@ class GameGUI:
                 if self.__last_state and self.__last_state[i][j] == state[i][j]:
                     continue
                 tile = pygame.image.load(
-                    f"assets/{get_image_from_tile_char(state[i][j])}.png")
+                    f"assets/{self.__get_image_from_tile_char(state[i][j])}.png")
                 tile_rect = tile.get_rect()
                 tile_rect.x, tile_rect.y = i * self.__image_size, j * self.__image_size
                 screen.get_screen().blit(tile, tile_rect)

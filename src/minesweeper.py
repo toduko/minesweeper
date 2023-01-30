@@ -4,8 +4,8 @@ Minesweeper module
 
 import sys
 
-from src.gui import GUI
-from src.cli import CLI
+from src.ui.gui import GUI
+from src.ui.cli import CLI
 
 if __name__ == "__main__":
     args = sys.argv[1:]

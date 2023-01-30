@@ -5,9 +5,9 @@ Button module
 from typing import Callable
 from pygame.draw import rect
 
-from src.screen import Screen
-from src.mouse import Mouse
-from src.text import Text
+from src.ui.screen import Screen
+from src.ui.mouse import Mouse
+from src.ui.text import Text
 
 
 class Button:

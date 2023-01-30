@@ -4,12 +4,11 @@ Leaderboard menu module
 
 from functools import partial
 
-from src.utils import get_top_k_scores
-from src.menu_state import MenuState, State
-from src.screen import Screen
-from src.button import Button
-from src.mouse import Mouse
-from src.text import Text
+from src.ui.menu_state import MenuState, State
+from src.ui.screen import Screen
+from src.ui.button import Button
+from src.ui.mouse import Mouse
+from src.ui.text import Text
 
 
 class LeaderboardMenu:
@@ -46,6 +45,14 @@ class LeaderboardMenu:
         '''
         Renders a list depending on the difficulty
         '''
+        def get_top_k_scores(k: int, difficulty: str):
+            '''
+            Renders the top scores of screen
+            '''
+            with open(difficulty, "r", encoding="utf-8") as file:
+                return sorted(list(map(float, filter(lambda x: x.replace(
+                    '.', '', 1).isdigit(), file.read().split("\n")))))[:k]
+
         screen.get_screen().fill((0, 0, 0))
 
         try:

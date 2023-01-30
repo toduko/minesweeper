@@ -4,7 +4,7 @@ Board module
 
 from itertools import product
 from random import randint
-from src.tile import Tile
+from src.base.tile import Tile
 
 
 class Board:

@@ -5,12 +5,12 @@ GUI module
 import sys
 import pygame
 
-from src.leaderboard_menu import LeaderboardMenu
-from src.difficulty_select import DifficultySelect
-from src.game_gui import GameGUI
-from src.screen import Screen
-from src.mouse import Mouse
-from src.menu_state import MenuState, State
+from src.ui.leaderboard_menu import LeaderboardMenu
+from src.ui.difficulty_select import DifficultySelect
+from src.ui.game_gui import GameGUI
+from src.ui.screen import Screen
+from src.ui.mouse import Mouse
+from src.ui.menu_state import MenuState, State
 
 
 class GUI:
