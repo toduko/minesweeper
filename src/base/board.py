@@ -114,7 +114,7 @@ class Board:
 
     def has_lost(self):
         '''
-        Checks if the game was won
+        Checks if the game was lost
         '''
         return self.__lose
 
